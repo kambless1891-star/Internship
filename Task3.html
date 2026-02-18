@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Tic Tac Toe</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap');
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+color:white;
+}
+
+h1{
+margin-bottom:15px;
+letter-spacing:2px;
+}
+
+/* Mode Buttons */
+.mode{
+margin-bottom:15px;
+}
+
+.mode button{
+margin:5px;
+}
+
+/* Game Board */
+.board{
+display:grid;
+grid-template-columns:repeat(3,100px);
+gap:12px;
+}
+
+.cell{
+width:100px;
+height:100px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:40px;
+background:#111;
+border-radius:15px;
+cursor:pointer;
+transition:.3s;
+box-shadow:0 0 15px #00e5ff;
+}
+
+.cell:hover{
+transform:scale(1.1);
+}
+
+.status{
+margin:20px;
+font-size:18px;
+min-height:24px;
+}
+
+button{
+padding:8px 20px;
+border:none;
+border-radius:20px;
+background:#00e5ff;
+cursor:pointer;
+font-size:15px;
+transition:.3s;
+}
+
+button:hover{
+transform:scale(1.1);
+box-shadow:0 0 15px #00e5ff;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Neon Tic Tac Toe</h1>
+
+<div class="mode">
+<button onclick="playWithPlayer()">2 Players</button>
+<button onclick="playWithAI('simple')">AI Simple</button>
+<button onclick="playWithAI('hard')">AI Hard</button>
+</div>
+
+<div class="status" id="status">Player X Turn</div>
+
+<div class="board">
+<div class="cell"></div>
+<div class="cell"></div>
+<div class="cell"></div>
+<div class="cell"></div>
+<div class="cell"></div>
+<div class="cell"></div>
+<div class="cell"></div>
+<div class="cell"></div>
+<div class="cell"></div>
+</div>
+
+<br>
+<button onclick="restart()">Restart</button>
+
+<script>
+
+let cells = document.querySelectorAll(".cell");
+let statusText = document.getElementById("status");
+
+let currentPlayer = "X";
+let gameActive = true;
+let vsAI = false;
+let aiLevel = "simple";
+
+let winPatterns = [
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
+
+function playWithPlayer(){
+vsAI = false;
+restart();
+}
+
+function playWithAI(level){
+vsAI = true;
+aiLevel = level;
+restart();
+}
+
+cells.forEach((cell,index)=>{
+cell.addEventListener("click",()=>{
+if(cell.innerText !== "" || !gameActive) return;
+
+makeMove(cell,index);
+
+if(vsAI && gameActive && currentPlayer === "O"){
+setTimeout(aiMove,500);
+}
+});
+});
+
+function makeMove(cell,index){
+cell.innerText = currentPlayer;
+
+if(checkWinner()) return;
+
+currentPlayer = currentPlayer === "X" ? "O" : "X";
+statusText.innerText = "Player " + currentPlayer + " Turn";
+}
+
+function checkWinner(){
+
+for(let pattern of winPatterns){
+
+let [a,b,c] = pattern;
+
+if(
+cells[a].innerText &&
+cells[a].innerText === cells[b].innerText &&
+cells[a].innerText === cells[c].innerText
+){
+statusText.innerText = "🎉 Player " + cells[a].innerText + " Wins!";
+gameActive = false;
+return true;
+}
+}
+
+let draw = [...cells].every(cell => cell.innerText !== "");
+
+if(draw){
+statusText.innerText = "Game Draw!";
+gameActive = false;
+return true;
+}
+
+return false;
+}
+
+function aiMove(){
+if(aiLevel === "simple"){
+randomMove();
+}else{
+smartMove();
+}
+}
+
+function randomMove(){
+let emptyCells = [...cells].filter(cell => cell.innerText === "");
+if(emptyCells.length === 0) return;
+let randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+makeMove(randomCell);
+}
+
+function smartMove(){
+
+// Try to Win
+for(let pattern of winPatterns){
+let [a,b,c] = pattern;
+let values = [cells[a].innerText, cells[b].innerText, cells[c].innerText];
+
+if(values.filter(v => v === "O").length === 2 && values.includes("")){
+let emptyIndex = pattern[values.indexOf("")];
+makeMove(cells[emptyIndex]);
+return;
+}
+}
+
+// Block Player
+for(let pattern of winPatterns){
+let [a,b,c] = pattern;
+let values = [cells[a].innerText, cells[b].innerText, cells[c].innerText];
+
+if(values.filter(v => v === "X").length === 2 && values.includes("")){
+let emptyIndex = pattern[values.indexOf("")];
+makeMove(cells[emptyIndex]);
+return;
+}
+}
+
+// Otherwise Random
+randomMove();
+}
+
+function restart(){
+cells.forEach(cell=> cell.innerText = "");
+currentPlayer = "X";
+gameActive = true;
+statusText.innerText = "Player X Turn";
+}
+
+</script>
+
+</body>
+</html>

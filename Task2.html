@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Stopwatch</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f2027,#203a43,#1c1c1c);
+    color:white;
+    font-family:'Share Tech Mono', monospace;
+}
+
+/* Title */
+h1{
+    margin-bottom:25px;
+    letter-spacing:4px;
+    color:#8ecae6;
+}
+
+/* Watch Container */
+.watch{
+    background:rgba(255,255,255,0.05);
+    padding:50px 70px;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,0.1);
+    box-shadow:0 0 30px rgba(0,0,0,0.6);
+    text-align:center;
+}
+
+/* Time Display */
+.time{
+    font-size:64px;
+    letter-spacing:5px;
+    color:#d1e8ff; /* Soft professional color */
+    text-shadow:0 0 8px rgba(209,232,255,0.3);
+    transition:transform 0.15s ease;
+}
+
+/* Pulse effect */
+.time.active{
+    transform:scale(1.02);
+}
+
+/* Buttons */
+.buttons{
+    margin-top:30px;
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+.buttons button{
+    padding:10px 20px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.start{ background:#52b788; }
+.pause{ background:#f4a261; }
+.reset{ background:#e63946; color:white; }
+.lap{ background:#457b9d; color:white; }
+
+.buttons button:hover{
+    transform:scale(1.08);
+}
+
+/* Lap Section */
+.laps{
+    margin-top:25px;
+    width:320px;
+    max-height:160px;
+    overflow-y:auto;
+    list-style:none;
+}
+
+.laps li{
+    padding:6px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>STOPWATCH</h1>
+
+<div class="watch">
+    <div class="time" id="display">00:00:00:00</div>
+
+    <div class="buttons">
+        <button class="start" onclick="start()">Start</button>
+        <button class="pause" onclick="pause()">Pause</button>
+        <button class="reset" onclick="resetWatch()">Reset</button>
+        <button class="lap" onclick="lap()">Lap</button>
+    </div>
+</div>
+
+<ul class="laps" id="laps"></ul>
+
+<script>
+
+let timer;
+let milliseconds = 0;
+let running = false;
+
+function formatTime(ms){
+    let hrs = Math.floor(ms / 3600000);
+    let mins = Math.floor((ms % 3600000) / 60000);
+    let secs = Math.floor((ms % 60000) / 1000);
+    let milli = Math.floor((ms % 1000) / 10);
+
+    return (
+        String(hrs).padStart(2,"0") + ":" +
+        String(mins).padStart(2,"0") + ":" +
+        String(secs).padStart(2,"0") + ":" +
+        String(milli).padStart(2,"0")
+    );
+}
+
+function update(){
+    milliseconds += 10;
+    document.getElementById("display").innerText = formatTime(milliseconds);
+
+    let display = document.getElementById("display");
+    display.classList.add("active");
+    setTimeout(()=>display.classList.remove("active"),100);
+}
+
+function start(){
+    if(!running){
+        timer = setInterval(update,10);
+        running = true;
+    }
+}
+
+function pause(){
+    clearInterval(timer);
+    running = false;
+}
+
+function resetWatch(){
+    clearInterval(timer);
+    milliseconds = 0;
+    running = false;
+    document.getElementById("display").innerText = "00:00:00:00";
+    document.getElementById("laps").innerHTML = "";
+}
+
+function lap(){
+    if(running){
+        let li = document.createElement("li");
+        li.innerText = "Lap " + (document.getElementById("laps").children.length + 1) + 
+                       " - " + formatTime(milliseconds);
+        document.getElementById("laps").appendChild(li);
+    }
+}
+
+</script>
+
+</body>
+</html>
